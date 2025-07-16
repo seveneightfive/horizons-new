@@ -72,7 +72,7 @@ const EventDirectory = () => {
             <div className="container mx-auto px-4 py-8 md:py-12">
                 <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-12">
                     <h1 className="text-4xl md:text-6xl font-bold text-slate-900 mb-4 uppercase tracking-wide">Event Directory</h1>
-                    <p className="text-xl text-slate-600 max-w-2xl mx-auto">Discover what's happening. Your next great experience awaits.</p>
+                    <p className="text-xl text-slate-600 max-w-2xl mx-auto">Discover what's happening in Top City..</p>
                 </motion.div>
 
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="mb-8 p-4 bg-white/60 backdrop-blur-sm rounded-xl border border-slate-200 shadow-md space-y-4">

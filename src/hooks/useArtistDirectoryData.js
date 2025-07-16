@@ -10,7 +10,7 @@ export const useArtistDirectoryData = () => {
     console.warn("Supabase is disconnected. Artist directory data is unavailable.");
   }, []);
 
-  const getEventsByArtistId = useCallback((artistId) => {
+  const getEventsByArtistId = useCallback((artistsId) => {
     return [];
   }, []);
 

@@ -20,7 +20,7 @@ function Dashboard() {
   };
 
   const tabs = [
-    { id: 'events', label: 'Upcoming Events', icon: Calendar, count: favoritedEvents.length },
+    { id: 'events', label: 'Liked Events', icon: Calendar, count: favoritedEvents.length },
     { id: 'artists', label: 'Following', icon: Users, count: followedArtists.length },
     { id: 'reviews', label: 'My Reviews', icon: Star, count: myReviews.length },
   ];
@@ -43,8 +43,8 @@ function Dashboard() {
     switch (activeTab) {
       case 'events':
         return favoritedEvents.length > 0 ? (
-          <EventsTab events={favoritedEvents} itemVariants={itemVariants} onEdit={handleActionClick} onDelete={handleActionClick} />
-        ) : <p className="text-slate-500 mt-4">You haven't favorited any events yet.</p>;
+          <EventsTab events={favoritedEvents} itemVariants={itemVariants} />
+        ) : <p className="text-slate-500 mt-4">You haven't liked any events yet.</p>;
       case 'artists':
         return followedArtists.length > 0 ? (
             <ArtistsTab artists={followedArtists} itemVariants={itemVariants} onEdit={handleActionClick} onDelete={handleActionClick} />

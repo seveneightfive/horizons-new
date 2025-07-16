@@ -34,7 +34,9 @@ export const useDashboardData = () => {
             const { data: favoritedEventsData, error: favoritedEventsError } = await supabase
                 .from('user_favorited_events')
                 .select('events (*, artists(name, slug))')
-                .eq('user_id', user.id);
+                .eq('user_id', user.id)
+                .order('created_at', { foreignTable: 'user_favorited_events', ascending: false });
+
 
             if (favoritedEventsError) throw favoritedEventsError;
             const events = favoritedEventsData.map(fe => fe.events).filter(Boolean);
