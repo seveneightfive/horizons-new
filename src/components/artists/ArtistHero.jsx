@@ -1,29 +1,17 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Users, Heart, Loader2 } from 'lucide-react';
+import { Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/contexts/SupabaseAuthContext';
-import { useFollow } from '@/hooks/useFollow';
-import { useNavigate } from 'react-router-dom';
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from '@/components/ui/use-toast';
 
-const ArtistHero = ({ artist, onFollowToggle }) => {
-    const { user } = useAuth();
-    const { isFollowing, toggleFollow, loading } = useFollow(artist.id, onFollowToggle);
-    const navigate = useNavigate();
+const ArtistHero = ({ artist }) => {
     const { toast } = useToast();
 
-    const handleFollowClick = () => {
-        if (!user) {
-            toast({
-                variant: "destructive",
-                title: "Login Required",
-                description: "You must be logged in to follow artists.",
-                action: <Button onClick={() => navigate('/login')}>Login</Button>
-            });
-            return;
-        }
-        toggleFollow();
+    const handleFollow = () => {
+        toast({
+            title: "You are now following " + artist.name + "!",
+            description: "You'll be notified about their upcoming events.",
+        });
     };
 
     return (
@@ -33,10 +21,10 @@ const ArtistHero = ({ artist, onFollowToggle }) => {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8 }}
         >
-            <img  
+            <img 
                 className="absolute inset-0 w-full h-full object-cover"
                 alt={`Hero image for ${artist.name}`}
-                src={artist.hero_image || "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4"} />
+             src="https://images.unsplash.com/photo-1624969593476-0cca787faaf1" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent"></div>
             <div className="container mx-auto px-4 h-full flex flex-col justify-end pb-12 relative z-10">
                 <motion.h1 
@@ -55,11 +43,10 @@ const ArtistHero = ({ artist, onFollowToggle }) => {
                 >
                     <div className="flex items-center gap-2">
                         <Users className="w-6 h-6" />
-                        <span className="text-xl font-semibold">{artist.fans_count || 0} Fans</span>
+                        <span className="text-xl font-semibold">{artist.fans.toLocaleString()} Fans</span>
                     </div>
-                    <Button onClick={handleFollowClick} size="lg" className="bg-white text-slate-900 hover:bg-slate-200 font-bold flex items-center gap-2" disabled={loading}>
-                        {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Heart className={`w-5 h-5 transition-colors ${isFollowing ? 'text-red-500 fill-current' : ''}`} />}
-                        {isFollowing ? 'Following' : 'Follow'}
+                    <Button onClick={handleFollow} size="lg" className="bg-white text-slate-900 hover:bg-slate-200 font-bold">
+                        Follow
                     </Button>
                 </motion.div>
             </div>
