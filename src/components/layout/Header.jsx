@@ -43,7 +43,7 @@ const Header = () => {
       <nav className="container mx-auto px-4 py-3 flex justify-between items-center">
         <NavLink to="/" className="flex items-center gap-2 text-2xl font-bold text-slate-800 font-oswald uppercase">
           <span className="text-3xl font-black text-slate-900 tracking-tighter">785</span>
-          EventHorizon
+          Events + Artists
         </NavLink>
         <div className="flex items-center gap-2 md:gap-4">
             <NavLink to="/artists" className={navLinkClasses}>
