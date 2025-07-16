@@ -197,12 +197,13 @@ export default defineConfig({
 		addTransformIndexHtml
 	],
 	server: {
-		cors: true,
-		headers: {
-			'Cross-Origin-Embedder-Policy': 'credentialless',
-		},
-		allowedHosts: true,
-	},
+    cors: true,
+    headers: {
+        'Cross-Origin-Embedder-Policy': 'credentialless',
+    },
+    allowedHosts: true,
+    historyApiFallback: true, // <-- this is the ONLY addition
+},
 	resolve: {
 		extensions: ['.jsx', '.js', '.tsx', '.ts', '.json', ],
 		alias: {
