@@ -186,25 +186,28 @@ export const unfollowArtist = async (userId, artistId) => {
 
 export const getArtistEvents = async (artistId) => {
   try {
-    // Try the array approach first
+    // Use junction table approach
     const { data: events, error: eventsError } = await supabase
-      .from("events")
+      .from("artist_events")
       .select(
-        "id, title, slug, start_date, end_date, start_time, end_time, venue, cost, hero_image, description, type, tags",
+        `
+        events (
+          id, title, slug, start_date, end_date, start_time, end_time,
+          venue, cost, hero_image, description, type, tags
+        )
+      `,
       )
-      .contains("artist_ids", [artistId]);
+      .eq("artist_id", artistId);
 
     if (eventsError) {
-      console.warn(
-        "Array query failed, trying alternative approach:",
-        eventsError,
-      );
+      console.warn("Junction table query failed:", eventsError);
       return [];
     }
 
-    // Filter for upcoming events
+    // Extract events from junction table results and filter for upcoming
     const now = new Date();
-    const upcomingEvents = (events || []).filter((event) => {
+    const allEvents = (events || []).map((ae) => ae.events).filter(Boolean);
+    const upcomingEvents = allEvents.filter((event) => {
       if (!event.start_date) return false;
       const eventDate = new Date(event.start_date);
       return eventDate >= now;
