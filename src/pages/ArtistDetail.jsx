@@ -20,10 +20,12 @@ import { Link } from "react-router-dom";
 const ArtistDetail = () => {
   const { slug } = useParams();
   const { toast } = useToast();
+  const { user } = useAuth();
   const [artist, setArtist] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isFollowing, setIsFollowing] = useState(false);
   const [fanCount, setFanCount] = useState(0);
+  const [followLoading, setFollowLoading] = useState(false);
 
   useEffect(() => {
     const fetchArtist = async () => {
@@ -33,6 +35,12 @@ const ArtistDetail = () => {
         if (artistData) {
           setArtist(artistData);
           setFanCount(artistData.fans || 0);
+
+          // Check if user is following this artist
+          if (user) {
+            const following = await checkIfFollowing(user.id, artistData.id);
+            setIsFollowing(following);
+          }
         }
       } catch (error) {
         console.error("Error fetching artist:", error);
@@ -44,7 +52,7 @@ const ArtistDetail = () => {
     if (slug) {
       fetchArtist();
     }
-  }, [slug]);
+  }, [slug, user]);
 
   const handleFollow = () => {
     setIsFollowing(!isFollowing);
