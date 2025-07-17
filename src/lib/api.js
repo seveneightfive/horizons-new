@@ -171,14 +171,14 @@ export const checkIfFollowing = async (userId, artistId) => {
 
   const { data, error } = await supabase
     .from("user_followed_artists")
-    .select("id")
+    .select("user_id")
     .eq("user_id", userId)
     .eq("artist_id", artistId)
-    .single();
+    .limit(1);
 
-  if (error && error.code !== "PGRST116") {
+  if (error) {
     throw new Error(error.message);
   }
 
-  return !!data;
+  return data && data.length > 0;
 };
