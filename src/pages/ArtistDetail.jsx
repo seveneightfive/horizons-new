@@ -54,17 +54,46 @@ const ArtistDetail = () => {
     }
   }, [slug, user]);
 
-  const handleFollow = () => {
-    setIsFollowing(!isFollowing);
-    setFanCount((prev) => (isFollowing ? prev - 1 : prev + 1));
-    toast({
-      title: isFollowing
-        ? `Unfollowed ${artist.name}`
-        : `Now following ${artist.name}!`,
-      description: isFollowing
-        ? "You will no longer receive updates about this artist."
-        : "You'll be notified about their upcoming events.",
-    });
+  const handleFollow = async () => {
+    if (!user) {
+      toast({
+        title: "Please log in",
+        description: "You need to be logged in to follow artists.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setFollowLoading(true);
+
+      if (isFollowing) {
+        await unfollowArtist(user.id, artist.id);
+        setIsFollowing(false);
+        setFanCount((prev) => prev - 1);
+        toast({
+          title: `Unfollowed ${artist.name}`,
+          description: "You will no longer receive updates about this artist.",
+        });
+      } else {
+        await followArtist(user.id, artist.id);
+        setIsFollowing(true);
+        setFanCount((prev) => prev + 1);
+        toast({
+          title: `Now following ${artist.name}!`,
+          description: "You'll be notified about their upcoming events.",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+      console.error("Follow/unfollow error:", error);
+    } finally {
+      setFollowLoading(false);
+    }
   };
 
   const formatDate = (dateString) => {
