@@ -11,10 +11,24 @@ import {
 import { motion } from "framer-motion";
 
 const HomeEventCard = ({ event }) => {
-  const getVenueName = (event) => {
-    if (event.venues?.name) {
-      return event.venues.name;
+  const getVenueName = (venue) => {
+    if (!venue) return "Venue TBA";
+
+    // Handle JSONB venue field
+    if (typeof venue === "object" && venue.name) {
+      return venue.name;
     }
+
+    // Handle stringified JSON
+    if (typeof venue === "string") {
+      try {
+        const venueObj = JSON.parse(venue);
+        return venueObj.name || "Venue TBA";
+      } catch (e) {
+        return venue; // Return as-is if it's just a string
+      }
+    }
+
     return "Venue TBA";
   };
 
