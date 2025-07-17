@@ -27,7 +27,7 @@ const parseEventTags = (event) => {
 export const getHomePageData = async () => {
   const { data: featuredEvents, error: eventsError } = await supabase
     .from("events")
-    .select("*")
+    .select("*, venues(name)")
     .eq("star", true)
     .order("start_date", { ascending: true })
     .limit(10);
