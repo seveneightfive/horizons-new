@@ -67,15 +67,7 @@ const EventCard = ({ event, onEdit, onDelete }) => {
         <div className="space-y-2 text-slate-600 mb-4 flex-grow">
           <div className="flex items-center gap-2">
             <Calendar className="w-4 h-4 text-slate-400" />
-            <span>
-              {event.start_date
-                ? new Date(event.start_date).toLocaleDateString("en-US", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })
-                : "Date TBA"}
-            </span>
+            <span>{formatDate(event.start_date)}</span>
           </div>
           <div className="flex items-center gap-2">
             <Clock className="w-4 h-4 text-slate-400" />
