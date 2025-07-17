@@ -70,41 +70,48 @@ export const getArtists = async () => {
 };
 
 export const getArtistBySlug = async (slug) => {
-  const { data, error } = await supabase
+  // First, get the artist
+  const { data: artist, error: artistError } = await supabase
     .from("artists")
-    .select(
-      `
-      *,
-      events(
-        id, title, slug, start_date, end_date, start_time, end_time,
-        venue, cost, hero_image, description, type, tags
-      )
-    `,
-    )
+    .select("*")
     .eq("slug", slug)
     .single();
 
-  if (error) {
-    if (error.code === "PGRST116") return null; // Not found
-    throw new Error(error.message);
+  if (artistError) {
+    if (artistError.code === "PGRST116") return null; // Not found
+    throw new Error(artistError.message);
   }
 
-  if (data) {
-    // Filter for upcoming events
-    const now = new Date();
-    const upcomingEvents = (data.events || []).filter((event) => {
-      if (!event.start_date) return false;
-      const eventDate = new Date(event.start_date);
-      return eventDate >= now;
-    });
+  if (artist) {
+    // Then get events where this artist is involved
+    const { data: events, error: eventsError } = await supabase
+      .from("events")
+      .select(
+        "id, title, slug, start_date, end_date, start_time, end_time, venue, cost, hero_image, description, type, tags, artist_ids",
+      )
+      .contains("artist_ids", [artist.id]);
 
-    data.events = upcomingEvents;
-    data.contact = data.contact || {};
-    data.gallery = data.gallery || [];
-    data.youtube_links = data.youtube_links || [];
+    if (eventsError) {
+      console.warn("Error fetching artist events:", eventsError);
+      artist.events = [];
+    } else {
+      // Filter for upcoming events
+      const now = new Date();
+      const upcomingEvents = (events || []).filter((event) => {
+        if (!event.start_date) return false;
+        const eventDate = new Date(event.start_date);
+        return eventDate >= now;
+      });
+
+      artist.events = upcomingEvents;
+    }
+
+    artist.contact = artist.contact || {};
+    artist.gallery = artist.gallery || [];
+    artist.youtube_links = artist.youtube_links || [];
   }
 
-  return data;
+  return artist;
 };
 
 export const getEvents = async () => {
