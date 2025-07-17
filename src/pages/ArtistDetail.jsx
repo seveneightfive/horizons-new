@@ -2,12 +2,18 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion } from "framer-motion";
-import { getArtistBySlug } from "@/lib/api";
+import {
+  getArtistBySlug,
+  followArtist,
+  unfollowArtist,
+  checkIfFollowing,
+} from "@/lib/api";
 import { Users, Heart, Play, Mail, Globe, Facebook } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
+import { useAuth } from "@/contexts/SupabaseAuthContext";
 import NotFound from "@/pages/NotFound";
 import { Link } from "react-router-dom";
 
