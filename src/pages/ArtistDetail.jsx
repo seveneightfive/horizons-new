@@ -204,6 +204,7 @@ const ArtistDetail = () => {
               onClick={handleFollow}
               size="lg"
               variant={isFollowing ? "outline" : "default"}
+              disabled={followLoading || !user}
               className={`font-bold transition-all duration-200 ${
                 isFollowing
                   ? "bg-transparent border-white text-white hover:bg-white hover:text-slate-900"
@@ -213,7 +214,11 @@ const ArtistDetail = () => {
               <Heart
                 className={`w-5 h-5 mr-2 ${isFollowing ? "fill-current" : ""}`}
               />
-              {isFollowing ? "Following" : "Follow"}
+              {followLoading
+                ? "Loading..."
+                : isFollowing
+                  ? "Following"
+                  : "Follow"}
             </Button>
           </motion.div>
         </div>
