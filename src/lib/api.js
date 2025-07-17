@@ -152,6 +152,39 @@ export const unfollowArtist = async (userId, artistId) => {
   return data;
 };
 
+export const getArtistEvents = async (artistId) => {
+  try {
+    // Try the array approach first
+    const { data: events, error: eventsError } = await supabase
+      .from("events")
+      .select(
+        "id, title, slug, start_date, end_date, start_time, end_time, venue, cost, hero_image, description, type, tags",
+      )
+      .contains("artist_ids", [artistId]);
+
+    if (eventsError) {
+      console.warn(
+        "Array query failed, trying alternative approach:",
+        eventsError,
+      );
+      return [];
+    }
+
+    // Filter for upcoming events
+    const now = new Date();
+    const upcomingEvents = (events || []).filter((event) => {
+      if (!event.start_date) return false;
+      const eventDate = new Date(event.start_date);
+      return eventDate >= now;
+    });
+
+    return upcomingEvents;
+  } catch (error) {
+    console.warn("Error fetching artist events:", error);
+    return [];
+  }
+};
+
 export const checkIfFollowing = async (userId, artistId) => {
   if (!userId || !artistId) return false;
 
