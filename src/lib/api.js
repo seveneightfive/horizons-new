@@ -1,54 +1,69 @@
-import { supabase } from '@/lib/customSupabaseClient';
+import { supabase } from "@/lib/customSupabaseClient";
 
 const parseEventTags = (event) => {
-    let parsedTags = [];
-    if (typeof event.tags === 'string') {
-      try {
-        const tags = JSON.parse(event.tags);
-        if (Array.isArray(tags)) {
-            parsedTags = tags;
-        }
-      } catch (e) {
-        console.error(`Failed to parse tags for event ${event.id}, treating as empty:`, e);
+  let parsedTags = [];
+  if (typeof event.tags === "string") {
+    try {
+      // First try to parse as JSON
+      const tags = JSON.parse(event.tags);
+      if (Array.isArray(tags)) {
+        parsedTags = tags;
       }
-    } else if (Array.isArray(event.tags)) {
-        parsedTags = event.tags;
+    } catch (e) {
+      // If JSON parsing fails, treat as comma-separated string
+      if (event.tags.trim()) {
+        parsedTags = event.tags
+          .split(",")
+          .map((tag) => tag.trim())
+          .filter((tag) => tag.length > 0);
+      }
     }
-    return { ...event, tags: parsedTags };
-}
+  } else if (Array.isArray(event.tags)) {
+    parsedTags = event.tags;
+  }
+  return { ...event, tags: parsedTags };
+};
 
 export const getHomePageData = async () => {
-    const { data: featuredEvents, error: eventsError } = await supabase
-        .from('events')
-        .select('*')
-        .eq('star', true)
-        .order('start_date', { ascending: true })
-        .limit(10);
-    if (eventsError) throw new Error(eventsError.message);
+  const { data: featuredEvents, error: eventsError } = await supabase
+    .from("events")
+    .select("*")
+    .eq("star", true)
+    .order("start_date", { ascending: true })
+    .limit(10);
+  if (eventsError) throw new Error(eventsError.message);
 
-    const { data: randomArtists, error: artistsError } = await supabase
-        .rpc('get_random_artists', { limit_count: 10 });
-    if (artistsError) throw new Error(artistsError.message);
+  const { data: randomArtists, error: artistsError } = await supabase.rpc(
+    "get_random_artists",
+    { limit_count: 10 },
+  );
+  if (artistsError) throw new Error(artistsError.message);
 
-    const { data: latestReviews, error: reviewsError } = await supabase
-        .from('reviews')
-        .select('*, artists(name, slug, profile_image)')
-        .order('created_at', { ascending: false })
-        .limit(3);
-    if (reviewsError) throw new Error(reviewsError.message);
+  const { data: latestReviews, error: reviewsError } = await supabase
+    .from("reviews")
+    .select("*, artists(name, slug, profile_image)")
+    .order("created_at", { ascending: false })
+    .limit(3);
+  if (reviewsError) throw new Error(reviewsError.message);
 
-    return { 
-        featuredEvents: featuredEvents.map(parseEventTags), 
-        randomArtists: (randomArtists || []).map(artist => ({ ...artist, events: artist.events || [] })), 
-        latestReviews 
-    };
+  return {
+    featuredEvents: featuredEvents.map(parseEventTags),
+    randomArtists: (randomArtists || []).map((artist) => ({
+      ...artist,
+      events: artist.events || [],
+    })),
+    latestReviews,
+  };
 };
 
 export const getArtists = async () => {
-  const { data, error } = await supabase.from('artists').select('*, events(*)').order('name');
+  const { data, error } = await supabase
+    .from("artists")
+    .select("*, events(*)")
+    .order("name");
   if (error) throw new Error(error.message);
   if (!data) return [];
-  return data.map(artist => ({
+  return data.map((artist) => ({
     ...artist,
     events: artist.events || [],
   }));
@@ -56,11 +71,11 @@ export const getArtists = async () => {
 
 export const getArtistBySlug = async (slug) => {
   const { data, error } = await supabase
-    .rpc('get_artist_details', { p_slug: slug })
+    .rpc("get_artist_details", { p_slug: slug })
     .single();
 
   if (error) {
-    if (error.code === 'PGRST116') return null; // Not found
+    if (error.code === "PGRST116") return null; // Not found
     throw new Error(error.message);
   }
 
@@ -77,7 +92,10 @@ export const getArtistBySlug = async (slug) => {
 };
 
 export const getEvents = async () => {
-  const { data, error } = await supabase.from('events').select('*').order('start_date');
+  const { data, error } = await supabase
+    .from("events")
+    .select("*")
+    .order("start_date");
   if (error) throw new Error(error.message);
 
   if (!data) return [];
@@ -86,9 +104,13 @@ export const getEvents = async () => {
 };
 
 export const getEventBySlug = async (slug) => {
-  const { data, error } = await supabase.from('events').select('*, artists(*)').eq('slug', slug).single();
+  const { data, error } = await supabase
+    .from("events")
+    .select("*, artists(*)")
+    .eq("slug", slug)
+    .single();
   if (error) {
-    if (error.code === 'PGRST116') return null;
+    if (error.code === "PGRST116") return null;
     throw new Error(error.message);
   }
 
@@ -98,7 +120,10 @@ export const getEventBySlug = async (slug) => {
 };
 
 export const addReview = async (reviewData) => {
-    const { data, error } = await supabase.from('reviews').insert([reviewData]).select('*, artists(name, slug, profile_image)');
-    if (error) throw new Error(error.message);
-    return data;
+  const { data, error } = await supabase
+    .from("reviews")
+    .insert([reviewData])
+    .select("*, artists(name, slug, profile_image)");
+  if (error) throw new Error(error.message);
+  return data;
 };
