@@ -143,3 +143,42 @@ export const addReview = async (reviewData) => {
   if (error) throw new Error(error.message);
   return data;
 };
+
+export const followArtist = async (userId, artistId) => {
+  const { data, error } = await supabase
+    .from("user_followed_artists")
+    .insert([{ user_id: userId, artist_id: artistId }])
+    .select();
+
+  if (error) throw new Error(error.message);
+  return data;
+};
+
+export const unfollowArtist = async (userId, artistId) => {
+  const { data, error } = await supabase
+    .from("user_followed_artists")
+    .delete()
+    .eq("user_id", userId)
+    .eq("artist_id", artistId)
+    .select();
+
+  if (error) throw new Error(error.message);
+  return data;
+};
+
+export const checkIfFollowing = async (userId, artistId) => {
+  if (!userId || !artistId) return false;
+
+  const { data, error } = await supabase
+    .from("user_followed_artists")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("artist_id", artistId)
+    .single();
+
+  if (error && error.code !== "PGRST116") {
+    throw new Error(error.message);
+  }
+
+  return !!data;
+};
