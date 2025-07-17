@@ -21,15 +21,23 @@ const EventCard = ({ event, onEdit, onDelete }) => {
 
   const formatTime = (timeString) => {
     if (!timeString) return "Time TBA";
+    // Since start_time is already a text field, just return it as-is
+    return timeString;
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return "Date TBA";
     try {
-      const time = new Date(`1970-01-01T${timeString}`);
-      return time.toLocaleTimeString("en-US", {
-        hour: "numeric",
-        minute: "2-digit",
-        hour12: true,
+      // Parse the date and display in Chicago timezone (UTC-5)
+      const date = new Date(dateString + "T00:00:00");
+      return date.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        timeZone: "America/Chicago",
       });
     } catch (e) {
-      return timeString;
+      return dateString;
     }
   };
 
