@@ -1,18 +1,18 @@
-import React from 'react';
-import { Helmet } from 'react-helmet';
-import { useQuery } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { getHomePageData } from '@/lib/api';
-import { Loader2, ArrowRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import ArtistDirectoryCard from '@/components/artists/ArtistDirectoryCard';
-import HomeEventCard from '@/components/home/HomeEventCard';
-import HomeReviewCard from '@/components/home/HomeReviewCard';
+import React from "react";
+import { Helmet } from "react-helmet-async";
+import { useQuery } from "@tanstack/react-query";
+import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
+import { getHomePageData } from "@/lib/api";
+import { Loader2, ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import ArtistDirectoryCard from "@/components/artists/ArtistDirectoryCard";
+import HomeEventCard from "@/components/home/HomeEventCard";
+import HomeReviewCard from "@/components/home/HomeReviewCard";
 
 const Home = () => {
   const { data, isLoading, isError, error } = useQuery({
-    queryKey: ['homePageData'],
+    queryKey: ["homePageData"],
     queryFn: getHomePageData,
   });
 
@@ -56,7 +56,10 @@ const Home = () => {
     <>
       <Helmet>
         <title>785 Event Horizon - Your Guide to Local Arts & Culture</title>
-        <meta name="description" content="Discover featured events, find new favorite local artists, and read the latest reviews. Your portal to the local arts and culture scene."/>
+        <meta
+          name="description"
+          content="Discover featured events, find new favorite local artists, and read the latest reviews. Your portal to the local arts and culture scene."
+        />
       </Helmet>
       <div className="space-y-16 md:space-y-24 py-12">
         {/* Featured Events */}
@@ -77,9 +80,13 @@ const Home = () => {
             <div className="relative">
               <div className="flex overflow-x-auto space-x-6 pb-4 scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-slate-100">
                 {data.featuredEvents.map((event) => (
-                   <motion.div key={event.id} variants={itemVariants} className="flex-shrink-0 w-[80vw] md:w-[400px]">
-                      <HomeEventCard event={event} />
-                   </motion.div>
+                  <motion.div
+                    key={event.id}
+                    variants={itemVariants}
+                    className="flex-shrink-0 w-[80vw] md:w-[400px]"
+                  >
+                    <HomeEventCard event={event} />
+                  </motion.div>
                 ))}
               </div>
             </div>
@@ -102,7 +109,11 @@ const Home = () => {
               <h2 className="text-3xl md:text-4xl font-bold text-slate-900">
                 Find Your New Favorite Artist
               </h2>
-              <Button asChild variant="link" className="text-slate-600 hover:text-slate-900">
+              <Button
+                asChild
+                variant="link"
+                className="text-slate-600 hover:text-slate-900"
+              >
                 <Link to="/artists">
                   View All Artists <ArrowRight className="ml-2 w-4 h-4" />
                 </Link>
@@ -113,10 +124,14 @@ const Home = () => {
               variants={itemVariants}
             >
               {data.randomArtists.map((artist) => (
-                <ArtistDirectoryCard 
-                  key={artist.id} 
-                  artist={artist} 
-                  upcomingEventsCount={artist.events?.filter(e => new Date(e.start_date) >= new Date()).length || 0}
+                <ArtistDirectoryCard
+                  key={artist.id}
+                  artist={artist}
+                  upcomingEventsCount={
+                    artist.events?.filter(
+                      (e) => new Date(e.start_date) >= new Date(),
+                    ).length || 0
+                  }
                 />
               ))}
             </motion.div>
