@@ -11,14 +11,11 @@ import {
 import { motion } from "framer-motion";
 
 const HomeEventCard = ({ event }) => {
-  const getVenueName = (venue) => {
-    if (!venue) return "Venue TBA";
-    try {
-      const venueObj = typeof venue === "string" ? JSON.parse(venue) : venue;
-      return venueObj.name || "Venue TBA";
-    } catch (e) {
-      return "Venue TBA";
+  const getVenueName = (event) => {
+    if (event.venues?.name) {
+      return event.venues.name;
     }
+    return "Venue TBA";
   };
 
   const getStartDate = (event) => {
