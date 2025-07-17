@@ -70,7 +70,7 @@ export const getArtists = async () => {
 };
 
 export const getArtistBySlug = async (slug) => {
-  // First, get the artist
+  // Just get the artist for now - keep it simple
   const { data: artist, error: artistError } = await supabase
     .from("artists")
     .select("*")
@@ -83,29 +83,8 @@ export const getArtistBySlug = async (slug) => {
   }
 
   if (artist) {
-    // Then get events where this artist is involved
-    const { data: events, error: eventsError } = await supabase
-      .from("events")
-      .select(
-        "id, title, slug, start_date, end_date, start_time, end_time, venue, cost, hero_image, description, type, tags, artist_ids",
-      )
-      .contains("artist_ids", [artist.id]);
-
-    if (eventsError) {
-      console.warn("Error fetching artist events:", eventsError);
-      artist.events = [];
-    } else {
-      // Filter for upcoming events
-      const now = new Date();
-      const upcomingEvents = (events || []).filter((event) => {
-        if (!event.start_date) return false;
-        const eventDate = new Date(event.start_date);
-        return eventDate >= now;
-      });
-
-      artist.events = upcomingEvents;
-    }
-
+    // For now, just return empty events array to avoid complex queries
+    artist.events = [];
     artist.contact = artist.contact || {};
     artist.gallery = artist.gallery || [];
     artist.youtube_links = artist.youtube_links || [];
