@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { Heart, Calendar } from "lucide-react";
 
 const ArtistCard = ({ artist, onEdit, onDelete }) => {
@@ -13,10 +14,13 @@ const ArtistCard = ({ artist, onEdit, onDelete }) => {
     : artist.numevents || 0;
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 p-6 group border border-slate-100 h-full flex flex-col">
+    <Link
+      to={`/artists/${artist.slug}`}
+      className="block bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 group border border-slate-100 h-full hover:scale-[1.02] cursor-pointer"
+    >
       <div className="text-center mb-4 flex-grow">
         <img
-          className="w-24 h-24 object-cover rounded-full mx-auto mb-4 border-4 border-slate-200"
+          className="w-24 h-24 object-cover rounded-full mx-auto mb-4 border-4 border-slate-200 group-hover:border-slate-300 transition-colors"
           alt={`${artist.name} artist photo`}
           src={
             artist.profile_image ||
@@ -44,7 +48,7 @@ const ArtistCard = ({ artist, onEdit, onDelete }) => {
           </span>
         </div>
       </div>
-    </div>
+    </Link>
   );
 };
 
