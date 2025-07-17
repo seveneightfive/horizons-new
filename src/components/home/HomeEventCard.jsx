@@ -84,7 +84,7 @@ const HomeEventCard = ({ event }) => {
               </div>
               <div className="flex items-center gap-2">
                 <MapPin className="w-4 h-4 text-slate-400" />
-                <span>{getVenueName(event)}</span>
+                <span>{getVenueName(event.venue)}</span>
               </div>
             </div>
           </div>
