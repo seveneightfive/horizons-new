@@ -1,28 +1,40 @@
-import React, { useState } from 'react';
-import { Helmet } from 'react-helmet';
-import { motion } from 'framer-motion';
-import { Calendar, Users, Star } from 'lucide-react';
-import { useDashboardData } from '@/hooks/useDashboardData';
-import EventsTab from '@/components/dashboard/EventsTab';
-import ReviewsTab from '@/components/dashboard/ReviewsTab';
-import ArtistsTab from '@/components/dashboard/ArtistsTab';
-import { useToast } from '@/components/ui/use-toast';
+import React, { useState } from "react";
+import { Helmet } from "react-helmet-async";
+import { motion } from "framer-motion";
+import { Calendar, Users, Star } from "lucide-react";
+import { useDashboardData } from "@/hooks/useDashboardData";
+import EventsTab from "@/components/dashboard/EventsTab";
+import ReviewsTab from "@/components/dashboard/ReviewsTab";
+import ArtistsTab from "@/components/dashboard/ArtistsTab";
+import { useToast } from "@/components/ui/use-toast";
 
 function Dashboard() {
-  const [activeTab, setActiveTab] = useState('events');
+  const [activeTab, setActiveTab] = useState("events");
   const { toast } = useToast();
-  const { favoritedEvents, followedArtists, myReviews, loading } = useDashboardData();
+  const { favoritedEvents, followedArtists, myReviews, loading } =
+    useDashboardData();
 
   const handleActionClick = () => {
     toast({
-        title: "🚧 This feature isn't implemented yet—but don't worry! You can request it in your next prompt! 🚀",
+      title:
+        "🚧 This feature isn't implemented yet—but don't worry! You can request it in your next prompt! 🚀",
     });
   };
 
   const tabs = [
-    { id: 'events', label: 'Liked Events', icon: Calendar, count: favoritedEvents.length },
-    { id: 'artists', label: 'Following', icon: Users, count: followedArtists.length },
-    { id: 'reviews', label: 'My Reviews', icon: Star, count: myReviews.length },
+    {
+      id: "events",
+      label: "Liked Events",
+      icon: Calendar,
+      count: favoritedEvents.length,
+    },
+    {
+      id: "artists",
+      label: "Following",
+      icon: Users,
+      count: followedArtists.length,
+    },
+    { id: "reviews", label: "My Reviews", icon: Star, count: myReviews.length },
   ];
 
   const containerVariants = {
@@ -39,20 +51,42 @@ function Dashboard() {
     if (loading) {
       return <p>Loading...</p>;
     }
-    
+
     switch (activeTab) {
-      case 'events':
+      case "events":
         return favoritedEvents.length > 0 ? (
           <EventsTab events={favoritedEvents} itemVariants={itemVariants} />
-        ) : <p className="text-slate-500 mt-4">You haven't liked any events yet.</p>;
-      case 'artists':
+        ) : (
+          <p className="text-slate-500 mt-4">
+            You haven't liked any events yet.
+          </p>
+        );
+      case "artists":
         return followedArtists.length > 0 ? (
-            <ArtistsTab artists={followedArtists} itemVariants={itemVariants} onEdit={handleActionClick} onDelete={handleActionClick} />
-        ) : <p className="text-slate-500 mt-4">You are not following any artists yet.</p>;
-      case 'reviews':
+          <ArtistsTab
+            artists={followedArtists}
+            itemVariants={itemVariants}
+            onEdit={handleActionClick}
+            onDelete={handleActionClick}
+          />
+        ) : (
+          <p className="text-slate-500 mt-4">
+            You are not following any artists yet.
+          </p>
+        );
+      case "reviews":
         return myReviews.length > 0 ? (
-          <ReviewsTab reviews={myReviews} itemVariants={itemVariants} onEdit={handleActionClick} onDelete={handleActionClick} />
-        ) : <p className="text-slate-500 mt-4">You haven't written any reviews yet.</p>;
+          <ReviewsTab
+            reviews={myReviews}
+            itemVariants={itemVariants}
+            onEdit={handleActionClick}
+            onDelete={handleActionClick}
+          />
+        ) : (
+          <p className="text-slate-500 mt-4">
+            You haven't written any reviews yet.
+          </p>
+        );
       default:
         return null;
     }
@@ -62,7 +96,10 @@ function Dashboard() {
     <>
       <Helmet>
         <title>Personal Dashboard - 785</title>
-        <meta name="description" content="Your personalized dashboard to track upcoming events, followed artists, and reviews." />
+        <meta
+          name="description"
+          content="Your personalized dashboard to track upcoming events, followed artists, and reviews."
+        />
       </Helmet>
 
       <div className="container mx-auto px-4 py-8 md:py-12">
@@ -75,7 +112,8 @@ function Dashboard() {
             Local. Vocal.
           </h1>
           <p className="text-xl text-slate-600 max-w-2xl mx-auto">
-            Find local events. Track your favorite artists. Share reviews and more.
+            Find local events. Track your favorite artists. Share reviews and
+            more.
           </p>
         </motion.div>
 
@@ -95,15 +133,15 @@ function Dashboard() {
                     onClick={() => setActiveTab(tab.id)}
                     className={`flex items-center gap-3 px-4 py-3 rounded-lg font-semibold transition-all duration-300 w-full text-left ${
                       activeTab === tab.id
-                        ? 'bg-slate-900 text-white shadow-lg'
-                        : 'bg-white text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                        ? "bg-slate-900 text-white shadow-lg"
+                        : "bg-white text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                     }`}
                   >
                     <Icon className="w-5 h-5" />
                     <span className="font-sans flex-grow">{tab.label}</span>
                     <span
                       className={`px-2 py-0.5 rounded-full text-xs ${
-                        activeTab === tab.id ? 'bg-white/20' : 'bg-slate-200'
+                        activeTab === tab.id ? "bg-white/20" : "bg-slate-200"
                       }`}
                     >
                       {tab.count}
