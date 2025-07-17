@@ -71,7 +71,17 @@ export const getArtists = async () => {
 
 export const getArtistBySlug = async (slug) => {
   const { data, error } = await supabase
-    .rpc("get_artist_details", { p_slug: slug })
+    .from("artists")
+    .select(
+      `
+      *,
+      events!inner(
+        id, title, slug, start_date, end_date, start_time, end_time,
+        venue, cost, hero_image, description, type, tags
+      )
+    `,
+    )
+    .eq("slug", slug)
     .single();
 
   if (error) {
@@ -80,12 +90,18 @@ export const getArtistBySlug = async (slug) => {
   }
 
   if (data) {
-    // The function already returns JSON, so no need to parse
-    data.events = data.events || [];
-    data.reviews = data.reviews || [];
+    // Filter for upcoming events
+    const now = new Date();
+    const upcomingEvents = (data.events || []).filter((event) => {
+      if (!event.start_date) return false;
+      const eventDate = new Date(event.start_date);
+      return eventDate >= now;
+    });
+
+    data.events = upcomingEvents;
     data.contact = data.contact || {};
     data.gallery = data.gallery || [];
-    data.youtubeLinks = data.youtube_links || [];
+    data.youtube_links = data.youtube_links || [];
   }
 
   return data;
