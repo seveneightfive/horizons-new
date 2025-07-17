@@ -75,7 +75,7 @@ export const getArtistBySlug = async (slug) => {
     .select(
       `
       *,
-      events!inner(
+      events(
         id, title, slug, start_date, end_date, start_time, end_time,
         venue, cost, hero_image, description, type, tags
       )
