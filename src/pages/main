@@ -1,0 +1,234 @@
+import React, { useState, useEffect, useCallback } from 'react';
+import { useParams, Link, useLocation } from 'react-router-dom';
+import { Helmet } from 'react-helmet';
+import { motion } from 'framer-motion';
+import { supabase } from '@/lib/customSupabaseClient';
+import { useAuth } from '@/contexts/SupabaseAuthContext';
+import { pageTransition, fadeIn } from '@/lib/motion';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { ArrowLeft, Users, Calendar, Heart, Share2, MapPin, Clock, Link as LinkIcon, Phone, Mail, Tag, HeartHandshake, Building } from 'lucide-react';
+import { useToast } from '@/components/ui/use-toast';
+
+const VenueDetailsPage = ({ showNotImplementedToast }) => {
+    const { slug } = useParams();
+    const location = useLocation();
+    const from = location.state?.from || '/venues';
+    const { user } = useAuth();
+    const { toast } = useToast();
+    const [venue, setVenue] = useState(null);
+    const [upcomingEvents, setUpcomingEvents] = useState([]);
+    const [isFollowing, setIsFollowing] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [followersCount, setFollowersCount] = useState(0);
+    const [eventsCount, setEventsCount] = useState(0);
+
+    const fetchVenueData = useCallback(async () => {
+        setLoading(true);
+        const { data: venueData, error: venueError } = await supabase
+            .from('venues')
+            .select('*')
+            .eq('slug', slug)
+            .single();
+
+        if (venueError || !venueData) {
+            console.error('Error fetching venue:', venueError);
+            setVenue(null);
+        } else {
+            setVenue(venueData);
+            
+            const { count: followers } = await supabase
+                .from('follows')
+                .select('*', { count: 'exact', head: true })
+                .eq('entity_id', venueData.id)
+                .eq('entity_type', 'venue');
+            setFollowersCount(followers || 0);
+
+            const { data: eventsData, count: events } = await supabase
+                .from('events')
+                .select('*', { count: 'exact', head: true })
+                .eq('venue_id', venueData.id)
+                .gt('date', new Date().toISOString());
+            setUpcomingEvents(eventsData || []);
+            setEventsCount(events || 0);
+
+            if (user) {
+                const { data: followData, error: followError } = await supabase
+                    .from('follows')
+                    .select('*')
+                    .eq('user_id', user.id)
+                    .eq('entity_id', venueData.id)
+                    .eq('entity_type', 'venue')
+                    .maybeSingle();
+                
+                if (!followError && followData) {
+                    setIsFollowing(true);
+                }
+            }
+        }
+        setLoading(false);
+    }, [slug, user]);
+
+    useEffect(() => {
+        fetchVenueData();
+    }, [fetchVenueData]);
+
+    const toggleFollow = async () => {
+        if (!user) {
+            toast({ title: "Please log in to follow venues.", variant: "destructive" });
+            return;
+        }
+
+        if (isFollowing) {
+            const { error } = await supabase
+                .from('follows')
+                .delete()
+                .match({ user_id: user.id, entity_id: venue.id, entity_type: 'venue' });
+            if (!error) {
+                setIsFollowing(false);
+                setFollowersCount(prev => prev - 1);
+                toast({ title: "Unfollowed!" });
+            }
+        } else {
+            const { error } = await supabase
+                .from('follows')
+                .insert({ user_id: user.id, entity_id: venue.id, entity_type: 'venue' });
+            if (!error) {
+                setIsFollowing(true);
+                setFollowersCount(prev => prev + 1);
+                toast({ title: "Following!" });
+            }
+        }
+    };
+
+    if (loading) {
+        return <div className="flex items-center justify-center h-screen">Loading venue...</div>;
+    }
+
+    if (!venue) {
+        return <div className="flex items-center justify-center h-screen">Venue not found.</div>;
+    }
+
+    const getPropertyIcon = (prop) => {
+        if (prop.toLowerCase().includes('women')) return <Building className="h-5 w-5 text-pink-400" />;
+        if (prop.toLowerCase().includes('lgbtq+')) return <HeartHandshake className="h-5 w-5 text-rose-400" />;
+        return <Tag className="h-5 w-5 text-muted-foreground" />;
+    }
+
+    return (
+        <motion.div
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            variants={pageTransition}
+        >
+            <Helmet>
+                <title>{venue.name} | Venue Details</title>
+                <meta name="description" content={venue.about} />
+            </Helmet>
+
+            <div className="lg:flex lg:h-screen">
+                <motion.div
+                    initial={{ x: '-100%' }}
+                    animate={{ x: 0 }}
+                    transition={{ duration: 0.7, ease: [0.25, 1, 0.5, 1] }}
+                    className="lg:w-1/2 lg:h-screen lg:fixed top-0 left-0"
+                >
+                    <div className="relative w-full h-full">
+                        <img 
+                            className="w-full h-full object-cover"
+                            alt={venue.name} src={venue.hero_image || 'https://images.unsplash.com/photo-1556912173-35feb39c5673'} />
+                        <div className="absolute inset-0 bg-black/50 flex flex-col justify-between p-8 md:p-12">
+                            <Link to={from} className="inline-flex items-center text-white/80 hover:text-white transition-colors bg-black/30 backdrop-blur-sm p-2 rounded-lg self-start">
+                                <ArrowLeft className="mr-2 h-4 w-4" />
+                                Back to Venues
+                            </Link>
+                            <div>
+                                <h1 className="text-5xl md:text-7xl font-bold font-heading uppercase text-white">{venue.name}</h1>
+                                <p className="text-xl text-white/80 mt-2">{venue.type} in {venue.neighborhood}</p>
+                            </div>
+                        </div>
+                    </div>
+                </motion.div>
+
+                <div className="lg:w-1/2 lg:ml-[50%]">
+                    <div className="p-8 md:p-12">
+                        <div className="flex items-center justify-between mb-8">
+                            <div className="flex items-center gap-6 text-center">
+                                <div>
+                                    <p className="font-bold font-heading text-2xl">{followersCount}</p>
+                                    <p className="text-xs text-muted-foreground uppercase">Fans</p>
+                                </div>
+                                <div>
+                                    <p className="font-bold font-heading text-2xl">{eventsCount}</p>
+                                    <p className="text-xs text-muted-foreground uppercase">Events</p>
+                                </div>
+                            </div>
+                            <div className="flex gap-2">
+                                <Button variant="outline" size="icon" onClick={showNotImplementedToast}><Share2 className="h-4 w-4" /></Button>
+                                <Button variant={isFollowing ? 'default' : 'outline'} onClick={toggleFollow}>
+                                    <Heart className={`mr-2 h-4 w-4 ${isFollowing ? 'text-red-500 fill-current' : ''}`} />
+                                    {isFollowing ? 'Following' : 'Follow'}
+                                </Button>
+                            </div>
+                        </div>
+
+                        <div className="space-y-8">
+                            <div>
+                                <h2 className="text-3xl font-bold font-heading uppercase text-foreground mb-4">About</h2>
+                                <p className="text-muted-foreground leading-relaxed">{venue.about}</p>
+                            </div>
+
+                            <Card className="bg-secondary/50">
+                                <CardContent className="p-6 space-y-4">
+                                    <h3 className="font-semibold text-foreground text-lg">Info</h3>
+                                    <div className="flex items-start gap-3"><MapPin className="h-5 w-5 text-primary mt-1 flex-shrink-0" /><a href={`https://www.openstreetmap.org/search?query=${encodeURIComponent(venue.location)}`} target="_blank" rel="noopener noreferrer" className="hover:text-primary">{venue.location}</a></div>
+                                    <div className="flex items-start gap-3"><Clock className="h-5 w-5 text-primary mt-1 flex-shrink-0" /><span>{venue.hours}</span></div>
+                                    {venue.contact?.website && <div className="flex items-start gap-3"><LinkIcon className="h-5 w-5 text-primary mt-1 flex-shrink-0" /><a href={venue.contact.website} target="_blank" rel="noopener noreferrer" className="hover:text-primary truncate">{venue.contact.website}</a></div>}
+                                    {venue.contact?.phone && <div className="flex items-start gap-3"><Phone className="h-5 w-5 text-primary mt-1 flex-shrink-0" /><a href={`tel:${venue.contact.phone}`} className="hover:text-primary">{venue.contact.phone}</a></div>}
+                                    {venue.contact?.email && <div className="flex items-start gap-3"><Mail className="h-5 w-5 text-primary mt-1 flex-shrink-0" /><a href={`mailto:${venue.contact.email}`} className="hover:text-primary truncate">{venue.contact.email}</a></div>}
+                                </CardContent>
+                            </Card>
+
+                            {venue.properties && venue.properties.length > 0 && (
+                                <div>
+                                    <h3 className="font-semibold text-foreground text-lg mb-4">Properties</h3>
+                                    <div className="flex flex-wrap gap-3">
+                                        {venue.properties.map(prop => (
+                                            <div key={prop} className="flex items-center gap-2 bg-secondary px-3 py-1.5 rounded-full text-sm">
+                                                {getPropertyIcon(prop)}
+                                                <span>{prop}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            <div>
+                                <h2 className="text-3xl font-bold font-heading uppercase text-foreground mb-4">Upcoming Events</h2>
+                                {upcomingEvents.length > 0 ? (
+                                    <div className="space-y-4">
+                                        {upcomingEvents.map(event => (
+                                            <Link key={event.id} to={`/events/${event.slug}`}>
+                                                <Card className="bg-secondary/50 hover:border-primary transition-colors">
+                                                    <CardContent className="p-4">
+                                                        <p className="font-semibold text-foreground">{event.title}</p>
+                                                        <p className="text-sm text-muted-foreground">{new Date(event.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}</p>
+                                                    </CardContent>
+                                                </Card>
+                                            </Link>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <p className="text-muted-foreground">No upcoming events scheduled.</p>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </motion.div>
+    );
+};
+
+export default VenueDetailsPage;
