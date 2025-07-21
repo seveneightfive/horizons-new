@@ -67,7 +67,7 @@ const EventDirectoryCard = ({ event }) => {
           </div>
           <div className="flex items-center gap-3">
             <MapPin className="w-4 h-4 text-slate-400 flex-shrink-0" />
-            <span className="font-sans">{event.venue}</span>
+            <span className="font-sans">{event.venues?.venuename || 'Venue TBA'}</span>
           </div>
         </div>
         <div className="flex flex-wrap gap-2 pt-4 border-t border-slate-100">

@@ -128,7 +128,7 @@ export const getArtistBySlug = async (slug) => {
 export const getEvents = async () => {
   const { data, error } = await supabase
     .from("events")
-    .select("*")
+    .select("*, venues(venuename)")
     .order("start_date");
   if (error) throw new Error(error.message);
 
